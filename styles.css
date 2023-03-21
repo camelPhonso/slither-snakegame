@@ -1,0 +1,25 @@
+:root{
+    --primary: #eee;
+    --secondary: #aaa;
+    --base: #333;
+}
+
+#game-board{
+    height: 90vmin;
+    width:90vmin;
+    background-color: var(--base);
+    margin:auto;
+    border:.25vmin solid var(--base);
+}
+
+.snake-node{
+    height:3vmin;
+    width:3vmin;
+    background-color:var(--primary);
+}
+
+.nibble{
+    height:3vmin;
+    width:3vmin;
+    background-color:var(--secondary);
+}
