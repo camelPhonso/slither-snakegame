@@ -1,4 +1,4 @@
-const isRunning = true;
+let isRunning = true;
 const gameBoard = document.getElementById("game-board");
 const snakeArray = [
   {
@@ -10,9 +10,9 @@ const snakeArray = [
     y: 25,
   },
   {
-    x:23,
-    y:25,
-  }
+    x: 23,
+    y: 25,
+  },
 ];
 let trekDirection = "right";
 
@@ -39,8 +39,8 @@ function createNibble() {
 // render the snake on screen ///////////////////////
 ////////////////////////////////////////////////////
 function renderSnake() {
-  let oldSnake = document.querySelectorAll('.snake-node');
-  oldSnake.forEach(node => node.remove());
+  let oldSnake = document.querySelectorAll(".snake-node");
+  oldSnake.forEach((node) => node.remove());
 
   snakeArray.forEach((node) => {
     let { x, y } = node;
@@ -51,7 +51,7 @@ function renderSnake() {
   });
 }
 
-function slitherOnScreen(direction) {
+function snakeSlithers(direction) {
   let snakeHead = snakeArray[0];
   switch (direction) {
     case "right":
@@ -70,16 +70,23 @@ function slitherOnScreen(direction) {
       snakeHead.x = snakeHead.x;
       snakeHead.y = snakeHead.y - 1;
   }
-  
+
   for (let i = snakeArray.length - 1; i > 0; i--) {
     let currentNode = snakeArray[i];
-    let nextNode = snakeArray[i-1];
-    
+    let nextNode = snakeArray[i - 1];
+
     currentNode.x = nextNode.x;
     currentNode.y = nextNode.y;
   }
-  
+
   renderSnake();
+}
+
+function snakeGrows() {
+  let snakeCopy = [...snakeArray];
+  let { x: lastX, y: lastY } = snakeCopy.splice(-1)[0];
+
+  snakeArray.push({ x: lastX, y: lastY });
 }
 
 // render nibbles on screen ////////////////////////////
@@ -91,24 +98,49 @@ function renderNibbles() {
   nibble.style.gridRowStart = Math.floor(Math.random() * 50);
 }
 
-function eatNibbles(){
-  let oldNibble = document.querySelector('.nibble');
+function eatNibbles() {
+  let oldNibble = document.querySelector(".nibble");
   oldNibble.remove();
-  
+  snakeGrows();
   renderNibbles();
 }
 
-function wasEaten(){
-  let nibble = document.querySelector('.nibble');
-  let nibbleY = nibble.style.gridColumnStart;
-  let nibbleX = nibble.style.gridRowStart;
+// interactions ////////////////////////////////////////
+///////////////////////////////////////////////////////
+function isTouching(element) {
+  let elementY = element.style.gridColumnStart;
+  let elementX = element.style.gridRowStart;
 
-  let snakeHead = document.querySelector('.snake-node');
+  let snakeHead = document.querySelector(".snake-node");
   let snakeY = snakeHead.style.gridColumnStart;
-  let snakeX = snakeHead.style.gridRowStart
+  let snakeX = snakeHead.style.gridRowStart;
 
-  if (nibbleY === snakeY && nibbleX === snakeX) return true;
+  if (elementY === snakeY && elementX === snakeX) return true;
   return false;
+}
+
+function snakeFeeds() {
+  let nibble = document.querySelector(".nibble");
+  if (isTouching(nibble)) eatNibbles();
+}
+
+function snakeTouchesItself() {
+  let snakeBody = document.querySelectorAll(".snake-node");
+  for (let i = 2; i < snakeBody.length; i++) {
+    if (isTouching(snakeBody[i])) return true;
+  }
+  return false;
+}
+
+function snakeTouchesTheWalls() {
+  let { x, y } = snakeArray[0];
+  if (x > 50 || x < 1 || y > 50 || y < 1) return true;
+  return false;
+}
+
+function snakeDies() {
+  if (snakeTouchesTheWalls()) isRunning = false;
+  if (snakeTouchesItself()) isRunning = false;
 }
 
 // event listeners ////////////////////////////////////
@@ -126,15 +158,24 @@ document.addEventListener("keydown", (e) => {
 
 // start game play //////////////////////////////////
 ////////////////////////////////////////////////////
+function deathLoop() {
+  gameBoard.style.backgroundColor = "red";
+  isRunning = true;
+  setTimeout(() => {
+    location.reload();
+  }, 500);
+}
+
 function newFrame() {
-  if (!isRunning) return;
+  if (!isRunning) return deathLoop();
   setTimeout(() => {
     console.log("running");
-    slitherOnScreen(trekDirection);
-    if(wasEaten()) eatNibbles();
+    snakeSlithers(trekDirection);
+    snakeFeeds();
+    snakeDies();
     newFrame();
   }, 125);
 }
 
 renderNibbles();
-// newFrame()
+// newFrame();
