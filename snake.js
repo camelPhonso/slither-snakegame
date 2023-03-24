@@ -1,4 +1,4 @@
-import {gameBoard, createSnakeNode} from './main.js'
+import { gameBoard, createSnakeNode } from "./main.js";
 
 // initial snake object ///////////////////////////////
 //////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ export function renderSnake() {
 
 // move the snake around the gameboad /////////////
 //////////////////////////////////////////////////
-function moveSnakeHead(direction){
+function moveSnakeHead(direction) {
   let snakeHead = snakeArray[0];
   switch (direction) {
     case "right":
@@ -59,7 +59,7 @@ function moveSnakeBody() {
   for (let i = snakeArray.length - 1; i > 0; i--) {
     let currentNode = snakeArray[i];
     let nextNode = snakeArray[i - 1];
-  
+
     currentNode.x = nextNode.x;
     currentNode.y = nextNode.y;
   }
@@ -73,9 +73,11 @@ export function snakeSlithers(direction) {
 
 // edit snake object to grow ///////////////////////////
 ///////////////////////////////////////////////////////
-export function snakeGrows() {
-  let snakeCopy = [...snakeArray];
-  let { x: lastX, y: lastY } = snakeCopy.splice(-1)[0];
+export function snakeGrows(number) {
+  let { x: xCoordinate, y: yCoordinate } = snakeArray[2];
 
-  snakeArray.push({ x: lastX, y: lastY });
+  while (number > 0) {
+    snakeArray.push({ x: xCoordinate, y: yCoordinate });
+    number--;
+  }
 }

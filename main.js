@@ -12,8 +12,9 @@ export const gameBoard = document.getElementById("game-board");
 let isRunning = true;
 let trekDirection = "right";
 let currentScore = 0;
-let gameSpeed = 125;
-let storedScore = JSON.parse(localStorage.getItem('slitherHighScore')) || 0;
+let gameSpeed = 130;
+let storedScore = JSON.parse(localStorage.getItem("slitherHighScore")) || 0;
+let snakeGrowthRate = Math.floor((currentScore / 100) * currentScore + 1);
 
 // templates ////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -38,31 +39,28 @@ export function createNibble() {
 // interactions ////////////////////////////////////////
 ///////////////////////////////////////////////////////
 function isTouchingSnakeHead(element) {
-  // check if an element is touchin
   let elementY = element.style.gridColumnStart;
   let elementX = element.style.gridRowStart;
-  
+
   let snakeHead = document.querySelector(".snake-node");
   let snakeY = snakeHead.style.gridColumnStart;
   let snakeX = snakeHead.style.gridRowStart;
-  
+
   if (elementY === snakeY && elementX === snakeX) return true;
   return false;
 }
 
-export function isWhereSnakeIs(xCoordinate, yCoordinate) {
-  return snakeArray.some((node) => {
-    let { x: snakeX, y: snakeY } = node;
-    snakeX == xCoordinate && snakeY === yCoordinate;
-  });
-} 
+export function isTouchingSnakeBody(givenX, givenY) {
+  // considers the entire snake, INCLUDING the head
+  return snakeArray.some((node) => node.x === givenX && node.y === givenY);
+}
 
 function snakeFeeds() {
   let nibble = document.querySelector(".nibble");
   if (isTouchingSnakeHead(nibble)) {
     eatNibbles();
     updateScores();
-    snakeGrows();
+    snakeGrows(snakeGrowthRate);
   }
 }
 
@@ -89,21 +87,36 @@ function snakeDies() {
 
 // event listeners ////////////////////////////////////
 //////////////////////////////////////////////////////
+function turnSnake(direction) {
+  switch (direction) {
+    case "ArrowDown":
+      if (trekDirection !== "up") trekDirection = "down";
+      break;
+    case "ArrowUp":
+      if (trekDirection !== "down") trekDirection = "up";
+      break;
+    case "ArrowRight":
+      if (trekDirection !== "left") trekDirection = "right";
+      break;
+    case "ArrowLeft":
+      if (trekDirection !== "right") trekDirection = "left";
+      break;
+  }
+}
+
+let startButton = document.getElementById("start-button");
+startButton.addEventListener("click", () => {
+  startGame();
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown" && trekDirection !== "up")
-  return (trekDirection = "down");
-  if (e.key === "ArrowUp" && trekDirection !== "down")
-  return (trekDirection = "up");
-  if (e.key === "ArrowRight" && trekDirection !== "left")
-  return (trekDirection = "right");
-  if (e.key === "ArrowLeft" && trekDirection !== "right")
-  return (trekDirection = "left");
+  e.key === 'Enter' ? startButton.click() : turnSnake(e.key);
 });
 
 // game play //////////////////////////////////
 ////////////////////////////////////////////////////
-function deathLoop() {
-  gameBoard.style.backgroundColor = "red";
+function deathScreen() {
+  gameBoard.style.backgroundColor = "#f83800";
   isRunning = true;
   setTimeout(() => {
     location.reload();
@@ -111,17 +124,16 @@ function deathLoop() {
 }
 
 function calculateGameSpeed() {
-  if (currentScore % 2 === 0) {
-    gameSpeed = gameSpeed + 0.85;
-    console.log(gameSpeed);
-  }
+  if (gameSpeed === 50) return;
+  if (currentScore % 5 === 0) gameSpeed -= 5;
 }
 
 function newFrame() {
-  if (!isRunning) return deathLoop();
+  if (!isRunning) return deathScreen();
   snakeSlithers(trekDirection);
   snakeFeeds();
   snakeDies();
+  
   setTimeout(() => {
     newFrame();
   }, gameSpeed);
@@ -129,27 +141,36 @@ function newFrame() {
 
 // track scores //////////////////////////////////////
 /////////////////////////////////////////////////////
-function setHighScore(score){
-  localStorage.setItem('slitherHighScore', JSON.stringify(score));
+function setHighScore(score) {
+  localStorage.setItem("slitherHighScore", JSON.stringify(score));
 }
 
 function displayScores() {
   let playerScore = document.getElementById("current-score");
   playerScore.textContent = `Your Score: ${currentScore}`;
-
-  let highScore = document.getElementById('high-score');
+  
+  let highScore = document.getElementById("high-score");
   highScore.textContent = `High Score: ${storedScore}`;
 }
 
 function updateScores() {
   currentScore++;
-  if(storedScore <= currentScore) setHighScore(currentScore);
+  if (storedScore < currentScore) setHighScore(currentScore);
   calculateGameSpeed();
   displayScores();
 }
 
 // initialise page /////////////////////
 ///////////////////////////////////////
-displayScores();
-renderNibbles();
-// newFrame();
+function disableButtonAndCursor(){
+  startButton.style.display = "none";
+  startButton.disabled = true;
+  gameBoard.style.cursor = "none";
+}
+
+function startGame() {
+  disableButtonAndCursor();
+  displayScores();
+  renderNibbles();
+  newFrame();
+}
