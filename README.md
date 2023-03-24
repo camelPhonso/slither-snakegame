@@ -18,3 +18,5 @@ You can run the server with the following command:
 ```terminal
 npm run watch
 ```
+## Deploying the page
+The game is hosted via github pages and can be played in this [link](https://camelphonso.github.io/slither-snakegame/)
