@@ -37,6 +37,7 @@ body{
 #start-button {
   position: absolute;
   width: 20vmin;
+  min-height:10vmin;
   top: 40vmin;
   left: 35vmin;
   border: none;
@@ -46,8 +47,9 @@ body{
 }
 
 #start-button:hover {
-  background-color: var(--secondary);
+  background-color: var(--base);
   color: var(--primary);
+  border:2px solid var(--primary);
 }
 
 .snake-node {

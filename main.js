@@ -66,7 +66,7 @@ function snakeFeeds() {
 
 // check if game over ///////////////////////////////////
 ////////////////////////////////////////////////////////
-function snakeTouchesItself() {
+function isTouchingItself() {
   let snakeBody = document.querySelectorAll(".snake-node");
   for (let i = 2; i < snakeBody.length; i++) {
     if (isTouchingSnakeHead(snakeBody[i])) return true;
@@ -74,15 +74,15 @@ function snakeTouchesItself() {
   return false;
 }
 
-function snakeTouchesTheWalls() {
+function isTouchingTheWalls() {
   let { x, y } = snakeArray[0];
   if (x > 50 || x < 1 || y > 50 || y < 1) return true;
   return false;
 }
 
 function snakeDies() {
-  if (snakeTouchesTheWalls()) isRunning = false;
-  if (snakeTouchesItself()) isRunning = false;
+  if (isTouchingTheWalls()) isRunning = false;
+  if (isTouchingItself()) isRunning = false;
 }
 
 // event listeners ////////////////////////////////////
@@ -110,13 +110,17 @@ startButton.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (e) => {
-  e.key === 'Enter' ? startButton.click() : turnSnake(e.key);
+  e.key === "Enter" ? startButton.click() : turnSnake(e.key);
 });
 
 // game play //////////////////////////////////
 ////////////////////////////////////////////////////
+let secondaryColour = getComputedStyle(
+  document.documentElement
+).getPropertyValue("--secondary");
+
 function deathScreen() {
-  gameBoard.style.backgroundColor = "#f83800";
+  gameBoard.style.backgroundColor = secondaryColour;
   isRunning = true;
   setTimeout(() => {
     location.reload();
@@ -133,7 +137,7 @@ function newFrame() {
   snakeSlithers(trekDirection);
   snakeFeeds();
   snakeDies();
-  
+
   setTimeout(() => {
     newFrame();
   }, gameSpeed);
@@ -148,7 +152,7 @@ function setHighScore(score) {
 function displayScores() {
   let playerScore = document.getElementById("current-score");
   playerScore.textContent = `Your Score: ${currentScore}`;
-  
+
   let highScore = document.getElementById("high-score");
   highScore.textContent = `High Score: ${storedScore}`;
 }
@@ -162,7 +166,7 @@ function updateScores() {
 
 // initialise page /////////////////////
 ///////////////////////////////////////
-function disableButtonAndCursor(){
+function disableButtonAndCursor() {
   startButton.style.display = "none";
   startButton.disabled = true;
   gameBoard.style.cursor = "none";
